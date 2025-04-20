@@ -18,25 +18,24 @@ public class JwtService {
     private String secret;
 
     public String generateToken(Users user) {
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
+
+        return token.replace("+", "-").replace("/", "_").replace("=", "");
     }
 
     public String extractUsername(String token) {
+        token = token.replace("-", "+").replace("_", "/");
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean isTokenValid(String token, Optional<Users> userDetails) {
         return extractUsername(token).equals(userDetails.get().getEmail());
     }
-
-    private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
-        return expiration.before(new Date());
-    }
 }
+
 
