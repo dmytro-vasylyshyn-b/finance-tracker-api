@@ -4,6 +4,7 @@ import com.vasylyshyn.finanseTracker.Entitys.Users;
 import com.vasylyshyn.finanseTracker.Repositorys.UserRepository;
 import com.vasylyshyn.finanseTracker.dtos.AuthRequest;
 import com.vasylyshyn.finanseTracker.dtos.RegisterRequest;
+import com.vasylyshyn.finanseTracker.exception.EmailAlreadyInUseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,7 +21,7 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyInUseException("email_in_use");
         }
 
         Users user = new Users();
