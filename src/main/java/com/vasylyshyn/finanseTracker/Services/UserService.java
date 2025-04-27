@@ -34,7 +34,9 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Users updateProfile(String email, UpdateProfileDto dto) {
+    public Users updateProfile(UpdateProfileDto dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -46,6 +48,7 @@ public class UserService implements UserDetailsService {
 
         return userRepository.save(user);
     }
+
 
     public void changePassword(String email, PasswordChangeDto dto) {
         Users user = userRepository.findByEmail(email)

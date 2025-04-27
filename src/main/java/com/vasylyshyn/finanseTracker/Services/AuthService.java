@@ -41,7 +41,8 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
-
+        System.out.println();
+        System.out.println(jwtService.generateToken(user));
         return jwtService.generateToken(user);
     }
 }

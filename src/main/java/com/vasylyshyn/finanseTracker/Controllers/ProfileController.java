@@ -34,7 +34,7 @@ public class ProfileController {
 
     @PutMapping
     public ResponseEntity<Users> updateProfile(@RequestBody UpdateProfileDto dto, Authentication auth) {
-        return ResponseEntity.ok(userService.updateProfile(auth.getName(), dto));
+        return ResponseEntity.ok(userService.updateProfile(dto));
     }
 
     @PutMapping("/password")
