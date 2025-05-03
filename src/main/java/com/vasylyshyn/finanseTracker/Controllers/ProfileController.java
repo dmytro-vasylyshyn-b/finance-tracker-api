@@ -43,12 +43,12 @@ public class ProfileController {
 
     @PutMapping("/password")
     public ResponseEntity<Void> changePassword(@RequestBody PasswordChangeDto dto, Authentication auth) {
-        userService.changePassword(auth.getName(), dto);
+        userService.changePassword(auth, dto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/photo")
     public ResponseEntity<String> uploadPhoto(@RequestParam("file") MultipartFile file, Authentication auth) {
-        return ResponseEntity.ok(userService.uploadProfilePhoto(auth.getName(), file));
+        return ResponseEntity.ok(userService.uploadProfilePhoto(auth, file));
     }
 }

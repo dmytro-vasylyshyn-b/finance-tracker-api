@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -27,7 +28,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final String uploadDir = "uploads/profile-photos";
+    private final String uploadDir = "uploads/";
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -49,11 +50,12 @@ public class UserService implements UserDetailsService {
     }
 
 
-    public void changePassword(String email, PasswordChangeDto dto) {
-        Users user = userRepository.findByEmail(email)
+    public void changePassword(Authentication auth, PasswordChangeDto dto) {
+        Users user_auth = (Users) auth.getPrincipal();
+        Users user = userRepository.findByEmail(user_auth.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
             throw new RuntimeException("Old password is incorrect");
         }
 
@@ -61,31 +63,34 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public String uploadProfilePhoto(String email, MultipartFile file) {
-        Users user = userRepository.findByEmail(email)
+    public String uploadProfilePhoto(Authentication auth, MultipartFile file) {
+        Users userAuth = (Users) auth.getPrincipal();
+        Users user = userRepository.findByEmail(userAuth.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
-            Files.createDirectories(Paths.get(uploadDir));
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new IllegalArgumentException("Дозволено лише зображення");
+            }
 
-            String filename = email.replaceAll("[^a-zA-Z0-9]", "_") + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, filename);
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Файл занадто великий");
+            }
+
+            Path uploadPath = Paths.get(uploadDir, "profile-photos");
+            Files.createDirectories(uploadPath);
+            String originalFilename = Paths.get(file.getOriginalFilename()).getFileName().toString();
+            String filename = userAuth.getEmail().replaceAll("[^a-zA-Z0-9]", "_") + "_" + UUID.randomUUID() + "_" + originalFilename;
+            Path filePath = uploadPath.resolve(filename);
             Files.write(filePath, file.getBytes());
-
-            user.setProfileImagePath(filePath.toString());
+            String relativePath = "/uploads/profile-photos/" + filename;
+            user.setProfileImagePath(relativePath);
             userRepository.save(user);
-
             return "Фото профілю оновлено";
         } catch (IOException e) {
             throw new RuntimeException("Помилка при збереженні фото", e);
         }
-    }
-
-    private Users getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
