@@ -27,14 +27,18 @@ public class ProfileController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<Optional<Users>> getProfile(Authentication auth) {
-        return ResponseEntity.ok(userService.getUserByEmail(auth.getName()));
+    @GetMapping()
+    public Optional<Users> getProfile(Authentication auth) {
+        Users user = (Users) auth.getPrincipal();
+        System.out.println();
+        System.out.println(user.toString());
+        return userService.getUserByEmail(user.getEmail());
     }
+
 
     @PutMapping
     public ResponseEntity<Users> updateProfile(@RequestBody UpdateProfileDto dto, Authentication auth) {
-        return ResponseEntity.ok(userService.updateProfile(dto));
+        return ResponseEntity.ok(userService.updateProfile(dto, auth));
     }
 
     @PutMapping("/password")

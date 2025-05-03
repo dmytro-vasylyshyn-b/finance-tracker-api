@@ -61,18 +61,17 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService()); // Виклик методу!
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Дозволяємо доступ з фронтенду, наприклад з localhost:3000
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5713")  // Вказати порт, на якому працює ваш фронтенд
+                .allowedOrigins("http://localhost:5713")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
-                .allowCredentials(true);  // Дозволяємо використовувати куки
+                .allowCredentials(true);
     }
 }

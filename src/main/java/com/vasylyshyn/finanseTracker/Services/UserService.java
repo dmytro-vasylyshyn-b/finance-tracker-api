@@ -34,10 +34,9 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Users updateProfile(UpdateProfileDto dto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        Users user = userRepository.findByEmail(email)
+    public Users updateProfile(UpdateProfileDto dto, Authentication auth) {
+        Users user_auth = (Users) auth.getPrincipal();
+        Users user = userRepository.findByEmail(user_auth.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setFirstName(dto.getFirstName());

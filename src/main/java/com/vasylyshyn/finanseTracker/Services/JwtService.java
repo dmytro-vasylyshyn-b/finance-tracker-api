@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -18,19 +19,20 @@ public class JwtService {
     private String secret;
 
     public String generateToken(Users user) {
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(Date.from(Instant.now().plus(7, ChronoUnit.DAYS)))
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
                 .compact();
-
-        return token.replace("+", "-").replace("/", "_").replace("=", "");
     }
 
     public String extractUsername(String token) {
-        token = token.replace("-", "+").replace("_", "/");
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser()
+                .setSigningKey(secret.getBytes(StandardCharsets.UTF_8))
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public boolean isTokenValid(String token, Optional<Users> userDetails) {

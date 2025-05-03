@@ -24,6 +24,7 @@ public class Users {
 
     private String preferredTheme = "light";
     private String preferredLanguage = "en";
+    private String startPage;
 
     private boolean phoneVerified;
     private boolean emailVerified;
