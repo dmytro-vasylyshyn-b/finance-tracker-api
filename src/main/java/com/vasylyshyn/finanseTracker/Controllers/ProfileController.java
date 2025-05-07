@@ -4,6 +4,7 @@ import com.vasylyshyn.finanseTracker.Entitys.Users;
 import com.vasylyshyn.finanseTracker.Services.UserService;
 import com.vasylyshyn.finanseTracker.dtos.PasswordChangeDto;
 import com.vasylyshyn.finanseTracker.dtos.UpdateProfileDto;
+import com.vasylyshyn.finanseTracker.dtos.UserPreferencesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,4 +52,17 @@ public class ProfileController {
     public ResponseEntity<String> uploadPhoto(@RequestParam("file") MultipartFile file, Authentication auth) {
         return ResponseEntity.ok(userService.uploadProfilePhoto(auth, file));
     }
+
+    @PostMapping("/preferences")
+    public ResponseEntity<Void> updatePreferences(@RequestBody UserPreferencesDTO dto, Authentication auth) {
+        userService.updateLanguageAndTheme(dto, auth);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/preferences")
+    public ResponseEntity<UserPreferencesDTO> getPreferences(Authentication auth) {
+        return ResponseEntity.ok(userService.getLanguageAndTheme(auth));
+    }
+
 }

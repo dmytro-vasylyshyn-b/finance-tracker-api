@@ -3,6 +3,7 @@ import com.vasylyshyn.finanseTracker.Entitys.Users;
 import com.vasylyshyn.finanseTracker.Repositorys.UserRepository;
 import com.vasylyshyn.finanseTracker.dtos.PasswordChangeDto;
 import com.vasylyshyn.finanseTracker.dtos.UpdateProfileDto;
+import com.vasylyshyn.finanseTracker.dtos.UserPreferencesDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -85,8 +86,12 @@ public class UserService implements UserDetailsService {
             Path filePath = uploadPath.resolve(filename);
             Files.write(filePath, file.getBytes());
             String relativePath = "/uploads/profile-photos/" + filename;
+            System.out.println();
+            System.out.println(relativePath);
+            System.out.println();
             user.setProfileImagePath(relativePath);
             userRepository.save(user);
+            System.out.println(user.getProfileImagePath());
             return "Фото профілю оновлено";
         } catch (IOException e) {
             throw new RuntimeException("Помилка при збереженні фото", e);
@@ -110,4 +115,19 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email);
     }
 
+    public void updateLanguageAndTheme(UserPreferencesDTO dto, Authentication authentication){
+        Users userAuth = (Users) authentication.getPrincipal();
+        Users user = userRepository.findByEmail(userAuth.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPreferredTheme(dto.getTheme());
+        user.setPreferredLanguage(dto.getLanguage());
+        userRepository.save(user);
+    }
+
+    public UserPreferencesDTO getLanguageAndTheme(Authentication authentication){
+        Users userAuth = (Users) authentication.getPrincipal();
+        Users user = userRepository.findByEmail(userAuth.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserPreferencesDTO(user.getPreferredTheme(), user.getPreferredLanguage());
+    }
 }
