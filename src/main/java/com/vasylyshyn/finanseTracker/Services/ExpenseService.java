@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,6 +44,13 @@ public class ExpenseService {
             Double maxAmount,
             Pageable pageable
     ) {
+        if (fromDate == null) {
+            fromDate = LocalDate.of(1000, 1, 1);
+        }
+        if (toDate == null) {
+            toDate = LocalDate.of(3000, 1, 1);
+        }
+
         Page<Expense> page = expenseRepository.searchByFilters(
                 user,
                 type,
@@ -101,5 +109,10 @@ public class ExpenseService {
         }
 
         expenseRepository.delete(expense);
+    }
+
+    public Optional<ExpenseResponseDTO> getById(Long id){
+        Optional<Expense> expense = expenseRepository.findById(id);
+        return expense.map(expenseMapper::toDto);
     }
 }

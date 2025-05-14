@@ -18,8 +18,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByUser(Users user);
     @Query("SELECT e FROM Expense e WHERE e.user = :user "
             + "AND (:type IS NULL OR e.type = :type) "
-            + "AND (:fromDate IS NULL OR e.date >= :fromDate) "
-            + "AND (:toDate IS NULL OR e.date <= :toDate) "
+            + "AND e.date BETWEEN :fromDate AND :toDate "
             + "AND (:minAmount IS NULL OR e.amount >= :minAmount) "
             + "AND (:maxAmount IS NULL OR e.amount <= :maxAmount)")
     Page<Expense> searchByFilters(
@@ -31,6 +30,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             @Param("maxAmount") Double maxAmount,
             Pageable pageable
     );
+
 }
 
 

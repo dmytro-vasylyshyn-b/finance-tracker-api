@@ -1,5 +1,6 @@
 package com.vasylyshyn.finanseTracker.Controllers;
 
+import com.vasylyshyn.finanseTracker.Entitys.Expense;
 import com.vasylyshyn.finanseTracker.Entitys.Users;
 import com.vasylyshyn.finanseTracker.Enums.MoneyType;
 import com.vasylyshyn.finanseTracker.Repositorys.UserRepository;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -42,6 +44,14 @@ public class ExpenseController {
     public ResponseEntity<List<ExpenseResponseDTO>> getAllExpenses(Authentication auth) {
         Users user = (Users) auth.getPrincipal();
         return ResponseEntity.ok(expenseService.getAllExpenses(user));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ExpenseResponseDTO> getTransaction(Authentication auth, @PathVariable Long id) {
+        Users user = (Users) auth.getPrincipal();
+        return expenseService.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/filtered")
